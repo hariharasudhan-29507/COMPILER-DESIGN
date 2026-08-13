@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-// Function to check if a state is in the accepting set T
 bool is_accepting(const char* cs, const char* T[], int T_size) {
     int k;
     for (k = 0; k < T_size; k++) {
@@ -14,13 +13,12 @@ bool is_accepting(const char* cs, const char* T[], int T_size) {
     return false;
 }
 
-// Lexer function
 char* dfa_lexer(const char* W, int i,
                  char*** transition_table, const char* states[], int num_states,
                  const char* alphabet,
                  const char* T[], int T_size) {
-    const char* cs = states[i]; // current state label
-    int fp = i;                 // forward pointer
+    const char* cs = states[i];
+    int fp = i;
     int len = strlen(W);
     int char_index;
     const char* pos;
@@ -70,12 +68,14 @@ int main() {
     char alphabet[256];
     char states[100][10];
     char*** transition_table;
-    char* T[100];              // accepting state labels
+    char* T[100];
     int T_size;
     char W[1000];
     int s, c, k;
+    int num_strings;
+    int str_idx;
 
-    printf("Enter the alphabet symbols as a continuous string (e.g., 'ab01'): ");
+    printf("Enter the input symbols : (a , b / 0, 1) ");
     fflush(stdout);
     scanf("%s", alphabet);
     alphabet_size = strlen(alphabet);
@@ -84,7 +84,7 @@ int main() {
     fflush(stdout);
     scanf("%d", &num_states);
 
-    printf("Enter state labels (space separated, e.g., 'A B C D E'): ");
+    printf("Enter state (A , B , C ...): ");
     fflush(stdout);
     for (s = 0; s < num_states; s++) {
         scanf("%s", states[s]);
@@ -98,47 +98,49 @@ int main() {
         }
     }
 
-    printf("Enter transition table (state x alphabet), use '-1' for no transition:\n");
+    printf("\nEnter the transition table (%d rows x %d columns'%s'):\n", num_states, alphabet_size, alphabet);
+    printf("Use '-1' for no transition.\n Enter data:\n\n");
     fflush(stdout);
+
     for (s = 0; s < num_states; s++) {
-        printf("From state %s:\n", states[s]);
-        fflush(stdout);
         for (c = 0; c < alphabet_size; c++) {
-            printf("  on '%c' -> ", alphabet[c]);
-            fflush(stdout);
             scanf("%s", transition_table[s][c]);
         }
     }
 
-    printf("Enter number of accepting states: ");
+    printf("\nEnter number of accepting states: ");
     fflush(stdout);
     scanf("%d", &T_size);
-    printf("Enter accepting state labels (space separated): ");
+    printf("Enter accepting state: ");
     fflush(stdout);
     for (k = 0; k < T_size; k++) {
         T[k] = malloc(10 * sizeof(char));
         scanf("%s", T[k]);
     }
 
-    printf("Enter the string W to analyze: ");
-    fflush(stdout);
-    scanf("%s", W);
-
     const char* state_ptrs[100];
     for (s = 0; s < num_states; s++) {
         state_ptrs[s] = states[s];
     }
 
-    // Cast T to const char** to match dfa_lexer signature
-    int i = 0;
-    char* lexeme = dfa_lexer(W, i, transition_table, state_ptrs, num_states, alphabet,
-                             (const char**)T, T_size);
+    printf("\nEnter number of strings: ");
+    fflush(stdout);
+    scanf("%d", &num_strings);
 
-    if (lexeme) {
-        printf("Lexeme starting at position %d: '%s'\n", i, lexeme);
-        free(lexeme);
-    } else {
-        printf("No valid lexeme starting at position %d\n", i);
+    for (str_idx = 0; str_idx < num_strings; str_idx++) {
+        printf("Enter string: ");
+        fflush(stdout);
+        scanf("%s", W);
+
+        char* lexeme = dfa_lexer(W, 0, transition_table, state_ptrs, num_states, alphabet,
+                                 (const char**)T, T_size);
+
+        if (lexeme) {
+            printf("Lexeme: %s accepted\n", lexeme);
+            free(lexeme);
+        } else {
+            printf("Lexeme not accepted\n");
+        }
     }
 
     for (s = 0; s < num_states; s++) {
