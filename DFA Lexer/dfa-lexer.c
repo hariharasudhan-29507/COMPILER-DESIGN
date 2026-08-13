@@ -16,7 +16,8 @@ bool is_accepting(const char* cs, const char* T[], int T_size) {
 char* dfa_lexer(const char* W, int i,
                  char*** transition_table, const char* states[], int num_states,
                  const char* alphabet,
-                 const char* T[], int T_size) {
+                 const char* T[], int T_size,
+                 int* out_fp, int* out_accepted) {
     const char* cs = states[i];
     int fp = i;
     int len = strlen(W);
@@ -51,7 +52,10 @@ char* dfa_lexer(const char* W, int i,
         fp++;
     }
 
+    *out_fp = fp;
+
     if (is_accepting(cs, T, T_size) && fp > i) {
+        *out_accepted = 1;
         int lexeme_len = fp - i;
         char* lexeme = malloc(lexeme_len + 1);
         if (!lexeme) return NULL;
@@ -59,7 +63,17 @@ char* dfa_lexer(const char* W, int i,
         lexeme[lexeme_len] = '\0';
         return lexeme;
     } else {
-        return NULL;
+        *out_accepted = 0;
+        if (fp > i) {
+            int lexeme_len = fp - i;
+            char* lexeme = malloc(lexeme_len + 1);
+            if (!lexeme) return NULL;
+            strncpy(lexeme, W + i, lexeme_len);
+            lexeme[lexeme_len] = '\0';
+            return lexeme;
+        } else {
+            return NULL;
+        }
     }
 }
 
@@ -98,8 +112,8 @@ int main() {
         }
     }
 
-    printf("\nEnter the transition table (%d rows x %d columns'%s'):\n", num_states, alphabet_size, alphabet);
-    printf("Use '-1' for no transition.\n Enter data:\n\n");
+    printf("\nEnter the transition table (%d rows x %d columns '%s'):\n", num_states, alphabet_size, alphabet);
+    printf("Use '-1' for no transition.\nEnter data:\n\n");
     fflush(stdout);
 
     for (s = 0; s < num_states; s++) {
@@ -132,11 +146,17 @@ int main() {
         fflush(stdout);
         scanf("%s", W);
 
+        int stopped_pos;
+        int accepted_flag;
         char* lexeme = dfa_lexer(W, 0, transition_table, state_ptrs, num_states, alphabet,
-                                 (const char**)T, T_size);
+                                 (const char**)T, T_size, &stopped_pos, &accepted_flag);
 
-        if (lexeme) {
+        if (accepted_flag) {
             printf("Lexeme: %s accepted\n", lexeme);
+            free(lexeme);
+        } else if (lexeme) {
+            printf("Lexeme not accepted, stopped at position %d, lexeme %s\n",
+                   stopped_pos + 1, lexeme);
             free(lexeme);
         } else {
             printf("Lexeme not accepted\n");
