@@ -17,7 +17,7 @@ char* dfa_lexer(const char* W, int i,
                  char*** transition_table, const char* states[], int num_states,
                  const char* alphabet,
                  const char* T[], int T_size,
-                 int* out_fp, int* out_accepted) {
+                 int* out_fp, int* out_accepted, int* out_cause) {
     const char* cs = states[i];
     int fp = i;
     int len = strlen(W);
@@ -25,10 +25,13 @@ char* dfa_lexer(const char* W, int i,
     const char* pos;
     int s, found;
 
+    *out_cause = 0;
+
     while (fp < len) {
         char ch = W[fp];
         pos = strchr(alphabet, ch);
         if (pos == NULL) {
+            *out_cause = 1;
             break;
         }
         char_index = pos - alphabet;
@@ -46,6 +49,7 @@ char* dfa_lexer(const char* W, int i,
 
         const char* next_state_label = transition_table[found][char_index];
         if (strcmp(next_state_label, "-1") == 0) {
+            *out_cause = 2;
             break;
         }
         cs = next_state_label;
@@ -148,18 +152,34 @@ int main() {
 
         int stopped_pos;
         int accepted_flag;
+        int cause;
         char* lexeme = dfa_lexer(W, 0, transition_table, state_ptrs, num_states, alphabet,
-                                 (const char**)T, T_size, &stopped_pos, &accepted_flag);
+                                 (const char**)T, T_size, &stopped_pos, &accepted_flag, &cause);
 
         if (accepted_flag) {
             printf("Lexeme: %s accepted\n", lexeme);
             free(lexeme);
         } else if (lexeme) {
-            printf("Lexeme not accepted, stopped at position %d, lexeme %s\n",
-                   stopped_pos + 1, lexeme);
+            if (cause == 1) {
+                printf("Lexeme not accepted, unknown symbol '%c' at position %d, lexeme %s\n",
+                       W[stopped_pos], stopped_pos + 1, lexeme);
+            } else if (cause == 2) {
+                printf("Lexeme not accepted, no transition at position %d, lexeme %s\n",
+                       stopped_pos + 1, lexeme);
+            } else {
+                printf("Lexeme not accepted, stopped at position %d, lexeme %s\n",
+                       stopped_pos + 1, lexeme);
+            }
             free(lexeme);
         } else {
-            printf("Lexeme not accepted\n");
+            if (cause == 1) {
+                printf("Lexeme not accepted, unknown symbol '%c' at position %d\n",
+                       W[stopped_pos], stopped_pos + 1);
+            } else if (cause == 2) {
+                printf("Lexeme not accepted, no transition at position %d\n", stopped_pos + 1);
+            } else {
+                printf("Lexeme not accepted, no characters consumed\n");
+            }
         }
     }
 
