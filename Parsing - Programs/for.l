@@ -5,7 +5,6 @@
 FILE *yyin;
 %}
 
-%option caseless
 
 %%
 
@@ -51,7 +50,7 @@ int yywrap()
 
 int main()
 {
-    yyin = fopen("input.txt", "r");
+    yyin = fopen("Input.java", "r");
 
     if (!yyin)
     {
