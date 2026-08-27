@@ -5,41 +5,20 @@
 FILE *yyin;
 %}
 
-
 %%
 
-"for"
-        { printf("<KEYWORD, %s>\n", yytext); }
-
-"int"|"float"|"double"|"char"|"boolean"
-        { printf("<DATATYPE, %s>\n", yytext); }
-
-"true"|"false"
-        { printf("<BOOLEAN, %s>\n", yytext); }
-
-"=="|"!="|"<="|">="|"<"|">"
-        { printf("<RELATIONAL_OPERATOR, %s>\n", yytext); }
-
-"++"|"--"
-        { printf("<INCREMENT_OPERATOR, %s>\n", yytext); }
-
-"="|"+"|"-"|"*"|"/"|"%"
-        { printf("<OPERATOR, %s>\n", yytext); }
-
-[a-zA-Z_][a-zA-Z0-9_]*
-        { printf("<IDENTIFIER, %s>\n", yytext); }
-
-[0-9]+(\.[0-9]+)?
-        { printf("<NUMBER, %s>\n", yytext); }
-
-"("|")"|"{"|"}"|";"|","
-        { printf("<PUNCTUATION, %s>\n", yytext); }
-
-[ \t\n]+
-        { /* Ignore whitespace */ }
-
-.
-        { printf("<UNKNOWN, %s>\n", yytext); }
+"for" { printf("<KEYWORD, %s>\n", yytext); }
+"int"|"float"|"double"|"char"|"boolean" { printf("<DATATYPE, %s>\n", yytext); }
+"true"|"false" { printf("<BOOLEAN, %s>\n", yytext); }
+"=="|"!="|"<="|">="|"<"|">" { printf("<RELATIONAL_OPERATOR, %s>\n", yytext); }
+"++"|"--" { printf("<INCREMENT_OPERATOR, %s>\n", yytext); }
+"="|"+"|"-"|"*"|"/"|"%" { printf("<OPERATOR, %s>\n", yytext); }
+[a-zA-Z_][a-zA-Z0-9_]* { printf("<IDENTIFIER, %s>\n", yytext); }
+[0-9]+(\.[0-9]+)? { printf("<NUMBER, %s>\n", yytext); }
+"("|")"|"{"|"}"|"["|"]" { printf("<PUNCTUATION, %s>\n", yytext); }
+":"|";"|"," {printf("<SEPARATOR,%s>\n",yytext); }
+[ \t\n]+ { /* Ignore whitespace */ }
+. { printf("<UNKNOWN, %s>\n", yytext); }
 
 %%
 
@@ -51,18 +30,13 @@ int yywrap()
 int main()
 {
     yyin = fopen("Input.java", "r");
-
     if (!yyin)
     {
-        printf("Error: Could not open input.txt!\n");
+        printf("Error: Could not open Input.java!\n");
         return 1;
     }
-
-    printf("Reading and tokenizing input.txt...\n\n");
-
+    printf("Reading and tokenizing Input.java...\n\n");
     yylex();
-
     fclose(yyin);
-
     return 0;
 }
