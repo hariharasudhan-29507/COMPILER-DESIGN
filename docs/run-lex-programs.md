@@ -1,33 +1,68 @@
-# Running Lex Programs
+# Running Compiler Design Programs
 
-This repository stores compiler design exercises as Lex (`.l`) files.
+This guide provides instructions for building and running the Lex (`.l`), YACC (`.y`), and C programs in this repository.
 
 ## Prerequisites
 
-- `flex`
-- `gcc`
+Ensure you have `flex`, `bison` (or `yacc`), and `gcc` installed.
 
 On Debian/Ubuntu:
 
 ```bash
 sudo apt update
-sudo apt install -y flex gcc
+sudo apt install -y flex bison gcc
 ```
 
-## Build and Run
+---
 
-From the repository root:
+## 1. Simple Lex Programs
+
+Programs located in `Simple Lex Programs/` take input either from stdin or from files in `Assets/`.
+
+### Example: Running `department.l`
 
 ```bash
-flex lex/basics/word_line_char_counter.l
-gcc lex.yy.c -o word_counter
-./word_counter < input.txt
+flex "Simple Lex Programs/department.l"
+gcc lex.yy.c -o department
+./department
 ```
 
-## Expected Output
+*Note: `department.l` expects `student.txt` to be present in the working directory or execution directory.*
 
-The sample program prints:
+### Example: Running `html.l`
 
-- Number of lines
-- Number of words
-- Number of characters
+```bash
+flex "Simple Lex Programs/html.l"
+gcc lex.yy.c -o html_parser
+./html_parser
+```
+
+---
+
+## 2. DFA Lexer (C Program)
+
+Located in `DFA Lexer/dfa-lexer.c`.
+
+### Build and Run:
+
+```bash
+gcc "DFA Lexer/dfa-lexer.c" -o dfa_lexer
+./dfa_lexer
+```
+
+---
+
+## 3. Parsing with Lex and YACC/Bison
+
+The `Parsing - Programs/` and `Parsing - YAAC/` directories contain complementary Lex and YACC files for parsing tasks (e.g., Java `for` loop parser).
+
+### Build and Run (`for.l` + `for.y`):
+
+```bash
+bison -d "Parsing - YAAC/for.y"
+flex "Parsing - Programs/for.l"
+gcc for.tab.c lex.yy.c -o for_parser
+./for_parser
+```
+
+*Note: `for.y` reads from `input.java`. Ensure an `input.java` file exists in the directory where the binary is executed.*
